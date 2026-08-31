@@ -4,6 +4,7 @@ from app.pets.pets_service import pets_service
 from app.students.students_schemas import CreateStudentDto, Student, UpdateStudentDto
 from app.students.students_service import students_service
 
+from app.shared.response_schema import ApiResponse
 router = APIRouter(prefix="/api/students", tags=["Students"])
 
 
@@ -18,8 +19,15 @@ def find_by_id(student_id: str) -> Student:
 
 
 @router.post("", status_code=201)
-def create(body: CreateStudentDto) -> Student:
-    return students_service.create(body)
+def create(body: CreateStudentDto) -> ApiResponse[Student]:
+    student = students_service.create(body)
+    return ApiResponse(
+        success=True,
+        status=201,
+        message="Estudiante creado con éxito",
+        data=student,
+        error=None
+    )
 
 
 @router.patch("/{student_id}")
