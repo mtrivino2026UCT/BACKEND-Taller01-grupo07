@@ -1,11 +1,24 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status
+
 from app.pets.pets_service import pets_service
 from app.students.students_schemas import CreateStudentDto, Student, UpdateStudentDto
 from app.students.students_service import students_service
-#from app.shared.response_schema import ApiResponse
+from app.shared.ApiResponse import ApiResponse  
 
-from typing import Generic, TypeVar, Optional, Any
-from pydantic import BaseModel
+from app.shared.response_schema import ApiResponse
+router = APIRouter(prefix="/api/students", tags=["Students"])
+
+@router.get("", response_model=ApiResponse[list[Student]])
+def find_all():
+    students = students_service.find_all()
+    return ApiResponse(
+        success=True,
+        statusCode=status.HTTP_200_OK,
+        message="La lista de estudiantes se obtuvo exitosamente",
+        data=students
+    )
+
+# ... (los demás endpoints quedan tal cual están hasta que tus compañeros los editen)
 
 T = TypeVar("T")
 
@@ -19,15 +32,17 @@ class ApiResponse(BaseModel, Generic[T]):
 
 router = APIRouter(prefix="/api/students", tags=["Students"])
 
-@router.get("", response_model=ApiResponse[list[Student]])
-def find_all():
-    students = students_service.find_all()
+@router.post("", status_code=201)
+def create(body: CreateStudentDto) -> ApiResponse[Student]:
+    student = students_service.create(body)
     return ApiResponse(
         success=True,
-        status=200,
-        message="Estudiantes obtenidos exitosamente",
-        data=students
+        status=201,
+        message="Estudiante creado con éxito",
+        data=student,
+        error=None
     )
+
 
 @router.get("/{student_id}", response_model=ApiResponse[Student])
 def find_by_id(student_id: str):
