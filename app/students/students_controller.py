@@ -31,13 +31,13 @@ def find_by_id(student_id: str):
             data=student,
             error=None
         )
-    except Exception as e:
+    except Exception:
         return ApiResponse(
             success=False,
             status=404,
-            message="No se pudo encontrar el estudiante",
+            message=f"Estudiante con ID {student_id} no fue encontrado",
             data=None,
-            error=str(e)
+            error="Not Found"
         )
 
 @router.post("", status_code=201)
