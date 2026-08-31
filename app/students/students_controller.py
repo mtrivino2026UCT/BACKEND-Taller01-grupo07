@@ -20,11 +20,17 @@ def find_all():
 
 # ... (los demás endpoints quedan tal cual están hasta que tus compañeros los editen)
 
+T = TypeVar("T")
 
-@router.get("/{student_id}")
-def find_by_id(student_id: str) -> Student:
-    return students_service.find_by_id(student_id)
+# Clase temporal de respuesta estándar hasta que se integre la de la carpeta shared
+class ApiResponse(BaseModel, Generic[T]):
+    success: bool
+    status: int
+    message: str
+    error: Optional[Any] = None
+    data: Optional[T] = None
 
+router = APIRouter(prefix="/api/students", tags=["Students"])
 
 @router.post("", status_code=201)
 def create(body: CreateStudentDto) -> ApiResponse[Student]:
@@ -38,14 +44,53 @@ def create(body: CreateStudentDto) -> ApiResponse[Student]:
     )
 
 
-@router.patch("/{student_id}")
-def update(student_id: str, body: UpdateStudentDto) -> Student:
-    return students_service.update(student_id, body)
+@router.get("/{student_id}", response_model=ApiResponse[Student])
+def find_by_id(student_id: str):
+    try:
+        student = students_service.find_by_id(student_id)
+        return ApiResponse(
+            success=True,
+            status=200,
+            message="Estudiante obtenido exitosamente",
+            error=None,
+            data=student
+        )
+    except Exception as e:
+        return ApiResponse(
+            success=False,
+            status=404,
+            message="No se pudo encontrar el estudiante",
+            error=str(e),
+            data=None
+        )
+    
+@router.post("", status_code=201, response_model=ApiResponse[Student])
+def create(body: CreateStudentDto):
+    student = students_service.create(body)
+    return ApiResponse(
+        success=True,
+        status=201,
+        message="Estudiante creado exitosamente",
+        data=student
+    )
 
+@router.patch("/{student_id}", response_model=ApiResponse[Student])
+def update(student_id: str, body: UpdateStudentDto):
+    student = students_service.update(student_id, body)
+    return ApiResponse(
+        success=True,
+        status=200,
+        message="Estudiante actualizado exitosamente",
+        data=student
+    )
 
-@router.delete("/{student_id}")
-def delete(student_id: str) -> Student:
+@router.delete("/{student_id}", response_model=ApiResponse[Student])
+def delete(student_id: str):
     deleted = students_service.delete(student_id)
     pets_service.delete_all_for_student(student_id)
-
-    return deleted
+    return ApiResponse(
+        success=True,
+        status=200,
+        message="Estudiante eliminado exitosamente",
+        data=deleted
+    )
