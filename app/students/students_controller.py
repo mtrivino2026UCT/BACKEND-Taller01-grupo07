@@ -28,16 +28,16 @@ def find_by_id(student_id: str):
             success=True,
             status=200,
             message="Estudiante obtenido exitosamente",
-            error=None,
-            data=student
+            data=student,
+            error=None
         )
     except Exception as e:
         return ApiResponse(
             success=False,
             status=404,
             message="No se pudo encontrar el estudiante",
-            error=str(e),
-            data=None
+            data=None,
+            error=str(e)
         )
 
 @router.post("", status_code=201)
