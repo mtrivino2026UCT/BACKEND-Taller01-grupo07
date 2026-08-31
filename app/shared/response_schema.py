@@ -8,3 +8,4 @@ class ApiResponse(BaseModel, Generic[T]):
     status: int
     message: str
     data: Optional[T] = None
+    error: Optional[Any] = None
