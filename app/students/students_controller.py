@@ -1,16 +1,24 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status
 
 from app.pets.pets_service import pets_service
 from app.students.students_schemas import CreateStudentDto, Student, UpdateStudentDto
 from app.students.students_service import students_service
+from app.shared.ApiResponse import ApiResponse  
 
 from app.shared.response_schema import ApiResponse
 router = APIRouter(prefix="/api/students", tags=["Students"])
 
+@router.get("", response_model=ApiResponse[list[Student]])
+def find_all():
+    students = students_service.find_all()
+    return ApiResponse(
+        success=True,
+        statusCode=status.HTTP_200_OK,
+        message="La lista de estudiantes se obtuvo exitosamente",
+        data=students
+    )
 
-@router.get("")
-def find_all() -> list[Student]:
-    return students_service.find_all()
+# ... (los demás endpoints quedan tal cual están hasta que tus compañeros los editen)
 
 
 @router.get("/{student_id}")
